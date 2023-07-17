@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Search engine</title>
+    <style>
+      html,
+      body {
+        font-family: sans-serif;
+      }
+
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      .navbar {
+        padding: 1rem 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .navbar ul {
+        list-style-type: none;
+        display: flex;
+      }
+
+      .navbar ul a {
+        font-size: 1rem;
+        color: #2a2a2a;
+        margin-right: 15px;
+        text-decoration: none;
+        transition: 0.2s ease;
+      }
+
+      .navbar ul a:hover {
+        transform: scale(1.15);
+      }
+
+      .search-box {
+        margin: 10px;
+      }
+
+      .search-box input {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        font-size: 1.1rem;
+        padding: 0.4rem 0.8rem;
+        margin-right: 0.5rem;
+      }
+
+      .search-box button {
+        padding: 0.4rem 0.8rem;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .main-content,
+      .recommended-content {
+        margin: 0 3rem;
+        padding-top: 2rem;
+        width: calc(100% - 6rem);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .article-grid {
+        margin-top: 2rem;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+      }
+
+      .article {
+        padding: 1rem;
+        position: relative;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        transition: all ease 0.3s;
+      }
+
+      .article:hover {
+        transition: all ease 0.3s;
+        transform: scale(1.02);
+      }
+
+      .article-heading {
+        font-size: 18px;
+        font-weight: bold;
+        padding-right: 22px;
+      }
+
+      .article-summary {
+        margin-top: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 6; /* number of lines to show */
+        line-clamp: 6;
+        -webkit-box-orient: vertical;
+      }
+
+      .like-icon {
+        position: absolute;
+        top: 5%;
+        right: 4%;
+        height: 20px;
+        width: 20px;
+        cursor: pointer;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .loader {
+        display: none;
+        border: 8px solid #f3f3f3; /* Light grey */
+        border-top: 8px solid #3498db; /* Blue */
+        border-radius: 50%;
+        margin-top: 2rem;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script
+      src="https://kit.fontawesome.com/bdb7804654.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body onload="onPageLoad()">
+    <!-- Navbar -->
+    <div class="navbar">
+      <ul>
+        <li><a href="#" onclick="fetchData('world', 'main')">World</a></li>
+        <li>
+          <a href="#" onclick="fetchData('politics', 'main')">Politics</a>
+        </li>
+        <li><a href="#" onclick="fetchData('Sports', 'main')">Sports</a></li>
+        <li>
+          <a href="#" onclick="fetchData('Business', 'main')">Business</a>
+        </li>
+        <li>
+          <a href="#" onclick="fetchData('Entertainment', 'main')"
+            >Entertainment</a
+          >
+        </li>
+        <li><a href="#" onclick="fetchData('Health', 'main')">Health</a></li>
+        <li><a href="#" onclick="fetchData('Style', 'main')">Style</a></li>
+        <li><a href="#" onclick="fetchData('Travel', 'main')">Travel</a></li>
+      </ul>
+      <form class="search-box" id="form">
+        <input type="text" placeholder="Search" id="query" />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <h1>Articles</h1>
+
+      <div class="loader" id="loader"></div>
+
+      <!-- Article grid -->
+      <div class="article-grid" id="article-grid"></div>
+    </div>
+
+    <!-- Recommended content -->
+    <div class="recommended-content">
+      <h1>Recommended For You</h1>
+      <div class="loader" id="loader"></div>
+      <!-- Article grid -->
+      <div class="article-grid" id="article-grid"></div>
+    </div>
+
+    <script>
+      form = document.getElementById("form");
+      loader = document.querySelectorAll(".loader");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        query = document.getElementById("query").value;
+        console.log(query);
+        fetchData(query, "main");
+      });
+
+      const printElements = (data, type) => {
+        if (type == "main") {
+          grid = document.querySelector(".main-content .article-grid");
+          loaderEl = loader[0];
+        } else {
+          grid = document.querySelector(".recommended-content .article-grid");
+          loaderEl = loader[1];
+        }
+        loaderEl.style.display = "block";
+
+        grid.innerHTML = "";
+        data.map((article, i) => {
+          div = document.createElement("div");
+          div.innerHTML = `
+            <div class="article">
+
+              <a href=${article.link} target="_blank" rel="noopener">
+                <h2 class="article-heading">${article.heading}</h2>
+                <p class="article-summary">${article.summary}</p>
+              </a>
+              <img src="like.png" class="like-icon" onclick="likeArticle(${article.link})">
+              </div>`;
+          grid.appendChild(div);
+        });
+        loaderEl.style.display = "none";
+        grid.style.display = "grid";
+      };
+
+      const fetchData = (query, type) => {
+        if (type == "main") {
+          grid = document.querySelector(".main-content .article-grid");
+          loaderEl = loader[0];
+        } else {
+          grid = document.querySelector(".recommended-content .article-grid");
+          loaderEl = loader[1];
+        }
+        loaderEl.style.display = "block";
+
+        grid.style.display = "none";
+        fetch(`http://127.0.0.1:8000/search?query=${query}`)
+          .then((response) => response.json())
+          .then((data) => {
+            printElements(data, type);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      };
+
+      const onPageLoad = async () => {
+        loader.forEach((l) => (l.style.display = "block"));
+        await fetchData("world", "main");
+        await fetchData("sports", "recommended");
+      };
+    </script>
+  </body>
+</html>
