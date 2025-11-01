@@ -17,7 +17,7 @@ To run the project locally, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/news-system.git
+   git clone https://github.com/vishal-63/news-search-engine.git
    ```
 
 2. Start the server
